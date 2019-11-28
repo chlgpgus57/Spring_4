@@ -6,8 +6,10 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,6 +30,11 @@ public class NoticeController {
 	
 	@Value("${notice}")
 	private String board;
+	
+	@ModelAttribute("board")
+	private String getBoard() {
+		return board;
+	}
 	
 	@PostMapping("summerDelete")
 	public ModelAndView summerDelete(String file, HttpSession session) throws Exception{
@@ -86,7 +93,6 @@ public class NoticeController {
 		List<BoardVO> ar =boardNoticeService.boardList(pager);
 		mv.addObject("list", ar);
 		mv.addObject("pager", pager);
-		mv.addObject("board", board);
 		mv.setViewName("board/boardList");
 		
 		return mv;
@@ -96,7 +102,6 @@ public class NoticeController {
 		
 		ModelAndView mv = new ModelAndView();
 		
-		mv.addObject("board", "notice");
 		mv.setViewName("board/boardWrite");
 		return mv;
 	}
@@ -117,7 +122,6 @@ public class NoticeController {
 		}
 		
 
-		mv.addObject("board", "notice");
 		
 		return mv;
 		
@@ -130,7 +134,6 @@ public class NoticeController {
 		boardVO = boardNoticeService.boardSelect(boardVO);
 		boardVO.setContents(boardVO.getContents().replace("\r\n", "<br>"));
 		mv.addObject("dto", boardVO);
-		mv.addObject("board", "notice");
 		mv.setViewName("board/boardSelect");
 		
 		return mv;
@@ -142,7 +145,6 @@ public class NoticeController {
 		
 		
 		mv.addObject("dto", boardNoticeService.boardSelect(boardVO));
-		mv.addObject("board", "notice");
 		mv.setViewName("board/boardUpdate");
 		return mv;
 	}
@@ -162,7 +164,6 @@ public class NoticeController {
 		}
 		
 
-		mv.addObject("board", "notice");
 		
 		return mv;
 	}
@@ -180,7 +181,6 @@ public class NoticeController {
 		}
 		
 		mv.addObject("path", "noticeList");
-		mv.addObject("board", "notice");
 		mv.setViewName("common/common_result");
 		return mv;
 	}

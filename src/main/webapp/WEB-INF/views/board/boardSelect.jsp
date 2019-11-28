@@ -25,10 +25,10 @@
 
 				<tr>
 
-					<td style="text-align: center;">${dto.title}</td>
-					<td style="text-align: center;">${dto.writer}</td>
-					<td style="text-align: center;">${dto.reg_date}</td>
-					<td style="text-align: center;">${dto.hit}</td>
+					<td style="text-align: center;">${boardVO.title}</td>
+					<td style="text-align: center;">${boardVO.writer}</td>
+					<td style="text-align: center;">${boardVO.reg_date}</td>
+					<td style="text-align: center;">${boardVO.hit}</td>
 				</tr>
 
 			</tbody>
@@ -37,15 +37,16 @@
 	</div>
 	<div class="container">
 		<div class="jumbotron">
-			<h4>${dto.contents}</h4>
+			<h4>${boardVO.contents}</h4>
 		</div>
 		
 		<div>
 			
-			<c:forEach items="${dto.files}" var="file">
+			<c:catch>
+			<c:forEach items="${boardVO.files}" var="file">
 				<a href="./fileDown?fnum=${file.fnum}">${file.oname}</a>
 			</c:forEach>
-			
+			</c:catch>
 			
 		</div>
 		
@@ -59,17 +60,17 @@
 			</div>
 			<div style="width: 213px; height: 33px; float: right;">
 
-				<c:if test="${member.id eq dto.writer}">
+				<c:if test="${member.id eq boardVO.writer}">
 					<a href="" class="btn btn-danger" data-toggle="modal"
 					data-target="#myModal" style="float: right; margin-left: 3px;">Delete</a>
 				</c:if>
 
 				<c:if test="${board ne 'notice'}">
-				<a href="qnaReply?num=${dto.num}" class="btn btn-info" style="float: right; margin-left: 3px;">Reply</a>
+				<a href="qnaReply?num=${boardVO.num}" class="btn btn-info" style="float: right; margin-left: 3px;">Reply</a>
 				</c:if>
 				
-				<c:if test="${member.id eq dto.writer}">
-					<a href="${board}Update?num=${dto.num}" class="btn btn-primary" style="float: right; margin-left: 3px;">Update</a>
+				<c:if test="${member.id eq boardVO.writer}">
+					<a href="${board}Update?num=${boardVO.num}" class="btn btn-primary" style="float: right; margin-left: 3px;">Update</a>
 				</c:if>
 
 				<!-- Modal -->
