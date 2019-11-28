@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="memberMapper">
+  
+  	
+  	<!-- <resultMap type="MemberVO" id="memberFile">
+  		<id property="id" column="id"/>
+  		<association property="memberFileVO" javaType="MemberFileVO">
+  			<id property="fnum" column="fnum" />
+  			<result property="fname" column="fname"/>
+  			<result property="oname" column="oname"/>
+  		</association>
+  	</resultMap> -->
+  	
+  	<insert id="memberJoin" parameterType="MemberVO">
+  		insert into member (id, pw, name, email, birth, gender, filename, originalname)
+		values (#{id}, #{pw}, #{name}, #{email}, #{birth}, #{gender}, #{filename}, #{originalname})
+  	</insert>
+  	
+  	<select id="memberLogin" parameterType="MemberVO" resultType="MemberVO">
+  		select * from member 
+  		where id = #{id} and pw = #{pw}
+  	</select>
+  	
+  	<select id="memberIdCheck" parameterType="MemberVO" resultType="MemberVO">
+  		select id from member
+  		where id = #{id}
+  	</select>
+  	<update id="memberUpdate" parameterType="MemberVO">
+  		update member set name=#{name}, email=#{email}, gender=#{gender}, birth=#{birth}
+  		where id=#{id}
+  	
+  	</update>
+  </mapper>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="noticeMapper">
+	
+	
+	<sql id="bs">
+		<choose>
+			<when test="kind == 'kt'">
+				where title like '%'||#{search}||'%'
+			</when>
+			<when test="kind == 'kc'">
+				where contents like '%'||#{search}||'%'
+			</when>
+			<otherwise>
+				where writer like '%'||#{search}||'%'
+			</otherwise>
+		</choose>
+	</sql>
+	<!-- 전체조회 -->
+	<select id="boardList"
+		resultType="NoticeVO"
+		parameterType="Pager">
+		select * from
+		(select N.*, rownum R from
+		(select * from notice
+		<include refid="bs"></include>
+		order by num desc) N)
+		where R between #{startRow} and #{lastRow}
+	</select>
+	
+	
+	
+	<!-- 글전체 수 -->
+	<select id="boardCount" resultType="Integer"
+		parameterType="Pager">
+		select count(num) from notice
+		<include refid="bs"></include>
+
+	</select>
+	<!-- 글쓰기 -->
+	<insert id="boardWrite" parameterType="BoardVO">
+		<selectKey order="BEFORE" resultType="Integer" keyProperty="num">
+			select board_seq.nextval from dual
+		</selectKey>
+		
+		insert into notice 
+  		values (#{num}, #{title} , #{writer} , #{contents} , sysdate, 0)
+		
+	</insert>
+	
+	<insert id="boardWrite2" parameterType="BoardVO">
+		insert into notice2
+		values (board_seq.currval, #{filename}, #{originalname})
+	</insert>
+	<!-- 글보기 -->
+	<resultMap type="NoticeVO" id="boardFile">
+		<id property="num" column="num" />
+		<result property="title" column="title"/>
+		<result property="writer" column="writer"/>
+		<result property="contents" column="contents"/>
+		<result property="reg_date" column="reg_date"/>
+		<result property="hit" column="hit"/>
+		<collection property="files" javaType="java.util.List" ofType="FilesVO">
+			<id property="fnum" column="fnum"/>
+			<result property="fname" column="fname"/>
+			<result property="oname" column="oname"/>
+		</collection>
+		
+	</resultMap>
+	
+	<select id="boardSelect" parameterType="BoardVO" resultMap="boardFile">
+		select * from notice N left outer join noticefiles F
+		using(num)
+		where num = #{num}
+	</select>
+	
+	<!-- 글수정 -->
+	<update id="boardUpdate" parameterType="BoardVO">
+		update notice set title = #{title}, contents = #{contents} where num = #{num}
+	</update>
+	
+	<!-- 글삭제 -->
+	<delete id="boardDelete" parameterType="BoardVO">
+		delete notice where num=#{num}
+	</delete>
+</mapper>

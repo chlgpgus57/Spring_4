@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="qnaMapper">
+
+	<sql id="bs">
+	<choose>
+			<when test="kind == 'kt'">
+				where title like '%'||#{search}||'%'
+			</when>
+			<when test="kind == 'kc'">
+				where contents like '%'||#{search}||'%'
+			</when>
+			<otherwise>
+				where writer like '%'||#{search}||'%'
+			</otherwise>
+		</choose>
+	</sql>
+
+	<!-- 전체조회 -->
+	<select id="boardList" resultType="QnaVO"
+		parameterType="Pager">
+		select * from
+		(select N.*, rownum R from
+		(select * from qna
+		<include refid="bs"></include>
+		order by ref desc, step asc) N)
+		where R between #{startRow} and
+		#{lastRow}
+	</select>
+
+	<!-- 글전체 수 -->
+	<select id="boardCount" resultType="Integer"
+		parameterType="Pager">
+		select count(num) from qna
+		<include refid="bs"></include>
+
+	</select>
+	<!-- 글쓰기 -->
+	<insert id="boardWrite" parameterType="BoardVO">
+		<selectKey order="BEFORE" resultType="Integer" keyProperty="num">
+			select board_seq.nextval from dual
+		</selectKey>
+	
+		insert into qna
+  		values (#{num}, #{title} , #{writer} , #{contents} , sysdate, 0, board_seq.currval, 0, 0)
+	</insert>
+	
+	<!-- 글보기 -->
+	<resultMap type="QnaVO" id="boardFile">
+		<id property="num" column="num"/>
+		<result property="title" column="title"/>
+		<result property="writer" column="writer"/>
+		<result property="contents" column="contents"/>
+		<result property="reg_date" column="reg_date"/>
+		<result property="hit" column="hit"/>
+		<result property="ref" column="ref"/>
+		<result property="step" column="step"/>
+		<result property="depth" column="depth"/>
+		<collection property="files" javaType="java.util.List" ofType="FilesVO" resultMap="filesResult">
+			
+		</collection>
+		
+	</resultMap>
+	<resultMap type="FilesVO" id="filesResult">
+		<id property="fnum" column="fnum"/>
+		<result property="fname" column="fname"/>
+		<result property="oname" column="oname"/>
+	</resultMap>
+	
+	
+	<select id="boardSelect" parameterType="BoardVO" resultMap="boardFile">
+		select * from qna Q left outer join qnafiles F
+		using(num)
+		where num = #{num}
+	</select>
+	<!-- 글수정 -->
+	<update id="boardUpdate" parameterType="BoardVO">
+		update qna set title = #{title}, contents = #{contents} where num = #{num}
+	</update>
+	<!-- 글삭제 -->
+	<delete id="boardDelete" parameterType="BoardVO">
+		delete qna where num=#{num}
+	</delete>
+	
+	<!-- 댓글 -->
+	<update id="boardReplyUpdate" parameterType="BoardVO">
+		update qna set step= step+1 where ref = (select ref from qna where num = #{num}) and step > (select step from qna where num = #{num})
+	</update>
+	
+	<insert id="boardReply" parameterType="BoardVO">
+		insert into qna values 
+		(board_seq.nextval, #{title}, #{writer}, #{contents}, sysdate, 0, (select ref from qna where num = #{num}), (select step from qna where num=#{num})+1 ,(select depth from qna where num=#{num})+1 )
+	</insert>
+</mapper>
